@@ -6,6 +6,6 @@ export const Config = Object.freeze({
 // apiBaseUrl: 'https://comp4537projectserverside-hvbud2gngtatg7cg.canadacentral-01.azurewebsites.net/api'
 
 // apiBaseUrl: 'https://comp4537projectserverside-qzcq.onrender.com/api'
-  apiBaseUrl: 'https://comp4537projectclientside.netlify.app/api'
+  apiBaseUrl: 'https://comp4537-projectserverside-e4hpapemggghh9ba.canadacentral-01.azurewebsites.net/api'
 });
 // moved to client/
