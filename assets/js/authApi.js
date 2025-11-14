@@ -19,42 +19,43 @@ class AuthApi {
   }
 
   async register(email, password) {
-    return this.#fetchJson('/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password })
-    });
-  }
+  return this.#fetchJson('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ email, password })
+  });
+}
 
-  async login(email, password) {
-    const data = await this.#fetchJson('/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password })
-    });
-    if (data && data.token) {
-      SessionStore.setToken(data.token);
-    }
-    return data;
+async login(email, password) {
+  const data = await this.#fetchJson('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ email, password })
+  });
+  if (data && data.token) {
+    SessionStore.setToken(data.token);
   }
+  return data;
+}
 
-  async me() {
-    return this.#fetchJson('/auth/me', {
-      method: 'GET',
-      credentials: 'include'
-    });
-  }
+async me() {
+  return this.#fetchJson('/api/auth/me', {
+    method: 'GET',
+    credentials: 'include'
+  });
+}
 
-  async logout() {
-    const res = await this.#fetchJson('/auth/logout', {
-      method: 'POST',
-      credentials: 'include'
-    });
-    SessionStore.clear();
-    return res;
-  }
+async logout() {
+  const res = await this.#fetchJson('/api/auth/logout', {
+    method: 'POST',
+    credentials: 'include'
+  });
+  SessionStore.clear();
+  return res;
+}
+
 
   async #handle(res) {
     if (!res.ok) {
