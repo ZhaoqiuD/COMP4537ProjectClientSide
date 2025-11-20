@@ -30,6 +30,9 @@ class LoginPage {
 
     try {
       await this.api.login(email, password);
+        if (data.token) {
+    localStorage.setItem("token", data.token);
+  }
       const me = await this.api.me();
       SessionStore.setRole(me?.role || 'user');
       window.location.href = me?.role === 'admin' ? 'admin.html' : 'user.html';
