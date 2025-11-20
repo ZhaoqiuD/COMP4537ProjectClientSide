@@ -94,7 +94,7 @@ class UserPage extends PageBase {
       const token = localStorage.getItem("token");
 
       try {
-        const response = await fetch("http://localhost:3000/api/ml/classify", {
+        const response = await fetch("https://comp4537-projectserverside-e4hpapemggghh9ba.canadacentral-01.azurewebsites.net/api/ml/classify", {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
           body: formData
