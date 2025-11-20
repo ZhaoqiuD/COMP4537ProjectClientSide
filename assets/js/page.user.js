@@ -124,14 +124,22 @@ if (data.model_output && Array.isArray(data.model_output)) {
 
   console.log("🧹 CLEANED STRING:", rawStr);
 
-  try {
-    const parsed = JSON.parse(rawStr);  // FINAL ATTEMPT
-    resultText.textContent = `${parsed.label} (${(parsed.confidence * 100).toFixed(1)}%)`;
+try {
+  const parsed = JSON.parse(rawStr);
 
-  } catch (err) {
-    console.error("FINAL PARSE ERROR:", err);
-    resultText.textContent = "⚠ Could not parse model output.";
+  if (Array.isArray(parsed) && parsed.length > 0) {
+    // Get BEST prediction
+    const best = parsed.reduce((a, b) => (a.confidence > b.confidence ? a : b));
+
+    resultText.textContent = `${best.label} (${(best.confidence * 100).toFixed(1)}%)`;
+  } else {
+    resultText.textContent = "⚠ Could not understand model output.";
   }
+} catch (err) {
+  console.error("FINAL PARSE ERROR:", err);
+  resultText.textContent = "⚠ Could not parse model output.";
+}
+
 }
  else {
       resultText.textContent = "❌ No prediction returned.";
