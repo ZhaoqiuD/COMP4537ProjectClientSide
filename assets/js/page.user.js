@@ -149,20 +149,22 @@ if (data.model_output && Array.isArray(data.model_output)) {
 
   }
 
-  handleFile(file) {
-    if (!file || !file.type.startsWith("image/")) return;
-    this.selectedFile = file;
+handleFile(file) {
+  if (!file || !file.type.startsWith("image/")) return;
 
-    const preview = document.getElementById('preview');
-    const reader = new FileReader();
-    reader.onload = e => {
-      preview.src = e.target.result;
-      preview.classList.remove('d-none');
-    };
-    reader.readAsDataURL(file);
+  this.selectedFile = new File([file], file.name, { type: file.type }); // <--- MAKE STABLE COPY
 
-    document.getElementById('classifyBtn').disabled = false;
-  }
+  const preview = document.getElementById('preview');
+  const reader = new FileReader();
+  reader.onload = e => {
+    preview.src = e.target.result;
+    preview.classList.remove('d-none');
+  };
+  reader.readAsDataURL(file);
+
+  document.getElementById('classifyBtn').disabled = false;
+}
+
 
   mountEvents() {
     const btnLogout = document.getElementById('btnLogout');
