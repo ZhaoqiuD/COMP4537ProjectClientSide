@@ -11,66 +11,56 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="./assets/css/styles.css" />
-    <style>
-      .drop-zone {
-        border: 2px dashed #6c757d;
-        border-radius: 10px;
-        padding: 40px;
-        text-align: center;
-        color: #6c757d;
-        transition: background-color 0.2s, border-color 0.2s;
-        cursor: pointer;
-      }
-      .drop-zone.dragover {
-        background-color: #f8f9fa;
-        border-color: #0d6efd;
-        color: #0d6efd;
-      }
-      .preview-img {
-        max-width: 200px;
-        margin-top: 15px;
-        border-radius: 8px;
-      }
-    </style>
   </head>
 
-  <body>
-    <nav class="navbar navbar-light bg-white app-navbar shadow-sm">
+  <body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
       <div class="container">
-        <a class="navbar-brand fw-semibold" href="index.html">Garbage Classifier</a>
+        <a class="navbar-brand fw-bold" href="index.html">🗑️ Garbage Classifier</a>
         <div class="d-flex gap-2">
-          <a class="btn btn-outline-primary" href="register.html">Register</a>
-          <a class="btn btn-primary" href="login.html">Login</a>
+          <a class="btn btn-outline-primary btn-sm" href="register.html">Register</a>
+          <a class="btn btn-primary btn-sm" href="login.html">Login</a>
         </div>
       </div>
     </nav>
 
     <main class="container my-5">
-      <div class="text-center mb-4">
-        <h1 class="display-6 fw-semibold">AI Garbage Classifier</h1>
-        <p class="text-muted">
-          Drop or select an image to identify the type of garbage.
-        </p>
-      </div>
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">AI Garbage Classifier</h1>
+            <p class="lead text-secondary">
+              Drop or select an image to identify the type of garbage.
+            </p>
+          </div>
 
-      <!-- Drop Zone -->
-      <div id="dropZone" class="drop-zone">
-        <p class="mb-0">Drag & drop an image here, or click to select</p>
-        <input type="file" id="fileInput" accept="image/*" hidden />
-        <img id="preview" class="preview-img d-none" />
-      </div>
+          <!-- Drop Zone -->
+          <div class="card shadow-sm mb-4">
+            <div class="card-body">
+              <div id="dropZone" class="drop-zone">
+                <p class="mb-2 fw-semibold">📤 Drag & drop an image here</p>
+                <p class="text-muted small mb-0">or click to browse</p>
+                <input type="file" id="fileInput" accept="image/*" hidden />
+                <img id="preview" class="preview-img d-none mt-3" />
+              </div>
+            </div>
+          </div>
 
-      <!-- Classify Button -->
-      <div class="text-center mt-4">
-        <button id="classifyBtn" class="btn btn-primary" disabled>
-          Classify Image
-        </button>
-      </div>
+          <!-- Classify Button -->
+          <div class="d-grid gap-2 mb-4">
+            <button id="classifyBtn" class="btn btn-primary btn-lg" disabled>
+              🔍 Classify Image
+            </button>
+          </div>
 
-      <!-- Results -->
-      <div id="resultBox" class="text-center mt-4 d-none">
-        <h4>Prediction:</h4>
-        <p id="resultText" class="fw-bold fs-5 text-success"></p>
+          <!-- Results -->
+          <div id="resultBox" class="card shadow-sm d-none">
+            <div class="card-body text-center">
+              <h5 class="card-title mb-3">Prediction Result:</h5>
+              <p id="resultText" class="fs-4 fw-bold text-success mb-0"></p>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
