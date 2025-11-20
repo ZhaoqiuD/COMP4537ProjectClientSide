@@ -29,13 +29,23 @@ class LoginPage {
     }
 
     try {
-      await this.api.login(email, password);
-        if (data.token) {
-    localStorage.setItem("token", data.token);
-  }
+      // 1️⃣ Capture login response 👇
+      const data = await this.api.login(email, password);
+
+      // 2️⃣ Store token properly 👇
+      if (data?.token) {
+        localStorage.setItem('token', data.token);
+      }
+
+      // 3️⃣ GET USER ROLE
       const me = await this.api.me();
       SessionStore.setRole(me?.role || 'user');
-      window.location.href = me?.role === 'admin' ? 'admin.html' : 'user.html';
+
+      // 4️⃣ REDIRECT BASED ON ROLE
+      window.location.href = me?.role === 'admin'
+        ? 'admin.html'
+        : 'user.html';
+
     } catch (err) {
       this.setError(err?.message || 'Login failed');
     }
@@ -58,8 +68,7 @@ class LoginPage {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const page = new LoginPage();
-  page.init();
+  new LoginPage().init();
 });
 
 export default LoginPage;
