@@ -5,29 +5,23 @@ class UserPage extends PageBase {
   constructor() {
     super('user-root');
     this.api = new AuthApi();
-<<<<<<< HEAD
-    this.selectedFile = null;
-=======
->>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
+    this.selectedFile = null;   // 👈 IMPORTANT
   }
 
   init() {
     if (!this.root) return;
+
     this.root.innerHTML = `
       <section>
         <div class="d-flex align-items-center justify-content-between">
           <h1 class="h4 mb-0">Welcome</h1>
-<<<<<<< HEAD
           <button id="btnLogout" class="btn btn-outline-danger btn-sm">Logout</button>
         </div>
 
         <div class="row mt-4 g-3">
+
+          <!-- LEFT CARD (API Usage) -->
           <div class="col-12 col-lg-5">
-=======
-        </div>
-        <div class="row mt-3 g-3">
-          <div class="col-12 col-lg-8">
->>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
             <div class="card shadow-sm">
               <div class="card-body">
                 <h2 class="h6">Your API Usage</h2>
@@ -37,13 +31,12 @@ class UserPage extends PageBase {
               </div>
             </div>
           </div>
-<<<<<<< HEAD
 
+          <!-- RIGHT CARD (AI CLASSIFIER) -->
           <div class="col-12 col-lg-7">
             <div class="card shadow-sm">
               <div class="card-body">
                 <h2 class="h6">AI Garbage Classifier</h2>
-                <p class="text-muted">Drop or select an image to classify.</p>
 
                 <div id="dropZone" class="drop-zone">
                   <p class="mb-0">Drag & drop an image here, or click to select</p>
@@ -59,14 +52,7 @@ class UserPage extends PageBase {
                   <h5>Prediction:</h5>
                   <p id="resultText" class="fw-bold fs-5 text-success"></p>
                 </div>
-=======
-          <div class="col-12 col-lg-4">
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <h2 class="h6">Quick Links</h2>
-                <p class="mb-2"><a href="#" class="link-secondary">Upload an image (coming soon)</a></p>
-                <p class="mb-0 text-muted">Your teammate can wire ML here.</p>
->>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
+
               </div>
             </div>
           </div>
@@ -74,115 +60,93 @@ class UserPage extends PageBase {
       </section>
     `;
 
-<<<<<<< HEAD
     this.setupClassifier();
     this.mountEvents();
   }
 
+  // IMAGE LOGIC
   setupClassifier() {
-    const dropZone = document.getElementById("dropZone");
-    const fileInput = document.getElementById("fileInput");
-    const preview   = document.getElementById("preview");
-    const classifyBtn = document.getElementById("classifyBtn");
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const preview   = document.getElementById('preview');
+    const classifyBtn = document.getElementById('classifyBtn');
+    const resultText = document.getElementById('resultText');
+    const resultBox = document.getElementById('resultBox');
 
-    dropZone.addEventListener("click", () => fileInput.click());
-    fileInput.addEventListener("change", e => this.handleFile(e.target.files[0]));
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => this.handleFile(e.target.files[0]));
 
-    dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
-    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
-    dropZone.addEventListener("drop", e => {
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
       e.preventDefault();
-      dropZone.classList.remove("dragover");
+      dropZone.classList.remove('dragover');
       this.handleFile(e.dataTransfer.files[0]);
     });
 
-    // 🚀 CLASSIFY BUTTON
-    classifyBtn.addEventListener("click", async () => {
+    classifyBtn.addEventListener('click', async () => {
       if (!this.selectedFile) return;
       classifyBtn.disabled = true;
-      classifyBtn.textContent = "Classifying...";
+      classifyBtn.textContent = 'Classifying...';
 
-      const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append("image", this.selectedFile);
+      formData.append('image', this.selectedFile);
+      const token = localStorage.getItem("token");
 
       try {
-        console.log("📤 Sending file to server ML API...");
         const response = await fetch("http://localhost:3000/api/ml/classify", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-          body: formData,
-          credentials: "include",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
         });
 
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        console.log("📥 ML RESPONSE:", data);
+        console.log("🔍 ML RESPONSE:", data);
 
-        if (!data.model_output) {
-          return this.showResult("No prediction returned.", false);
-        }
+if (data.model_output && Array.isArray(data.model_output)) {
+    // 1) take the first string
+    let raw = data.model_output[0]; 
+    console.log("RAW:", raw);  
 
-        // 🔥 CONVERT PYTHON FORMAT → VALID JSON
-let raw = data.model_output[0];
-let cleanJson = raw.replace(/'/g, '"');        // ' → "
-let parsedArray = JSON.parse(cleanJson);       // 🔥 NOW valid JS array
-let result = parsedArray[0];                   // take FIRST element
+    // 2) convert Python → JSON properly  
+    let clean = raw
+      .replace(/'/g, '"')         // ' → "
+      .replace(/^\[|\]$/g, '');   // remove surrounding [  ]
 
-// 👌 NOW result = { label: "cardboard", confidence: 0.98 }
-this.showResult(
-  `${result.label} (${(result.confidence * 100).toFixed(1)}%)`,
-  true
-);
+    console.log("CLEAN:", clean);
+
+    // 3) NOW parse safely
+    const parsed = JSON.parse(clean);
+
+    resultText.textContent = `${parsed.label} (${(parsed.confidence * 100).toFixed(1)}%)`;
+    resultBox.classList.remove('d-none');
+}
 
       } catch (err) {
-        console.error("❌ ERROR:", err);
-        this.showResult(`Server error: ${err.message}`, false);
-      } finally {
-        classifyBtn.disabled = false;
-        classifyBtn.textContent = "Classify Image";
+        resultText.textContent = "Error contacting server";
+        resultBox.classList.remove('d-none');
       }
+
+      classifyBtn.disabled = false;
+      classifyBtn.textContent = 'Classify Image';
     });
   }
 
   handleFile(file) {
-    if (!file || !file.type.startsWith("image/")) {
-      alert("Please upload an image.");
-      return;
-    }
+    if (!file || !file.type.startsWith("image/")) return;
+    this.selectedFile = file;
 
-    const preview = document.getElementById("preview");
+    const preview = document.getElementById('preview');
     const reader = new FileReader();
     reader.onload = e => {
       preview.src = e.target.result;
-      preview.classList.remove("d-none");
+      preview.classList.remove('d-none');
     };
     reader.readAsDataURL(file);
 
-    this.selectedFile = file;
-    document.getElementById("classifyBtn").disabled = false;
-    console.log("📸 Selected File:", file);
+    document.getElementById('classifyBtn').disabled = false;
   }
 
-  showResult(message, success = true) {
-    const resultText = document.getElementById("resultText");
-    const resultBox = document.getElementById("resultBox");
-
-    resultText.textContent = message;
-    resultText.classList.toggle("text-success", success);
-    resultText.classList.toggle("text-danger", !success);
-
-    resultBox.classList.remove("d-none");
-  }
-
-=======
-    this.mountEvents();
-  }
-
->>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
   mountEvents() {
     const btnLogout = document.getElementById('btnLogout');
     if (btnLogout) {
@@ -194,17 +158,9 @@ this.showResult(
   }
 }
 
-<<<<<<< HEAD
-=======
-// Bootstrap page
->>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
+// Bootstrap on load
 document.addEventListener('DOMContentLoaded', () => {
-  const page = new UserPage();
-  page.init();
+  new UserPage().init();
 });
 
 export default UserPage;
-<<<<<<< HEAD
-=======
-// moved to client/
->>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
