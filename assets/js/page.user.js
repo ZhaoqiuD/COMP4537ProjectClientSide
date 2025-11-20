@@ -82,62 +82,66 @@ class UserPage extends PageBase {
     });
 
     // CLASSIFY IMAGE
-    classifyBtn.addEventListener('click', async () => {
-      if (!this.selectedFile) return;
-      classifyBtn.disabled = true;
-      classifyBtn.textContent = 'Classifying...';
+// CLASSIFY IMAGE
+classifyBtn.addEventListener('click', async () => {
+  if (!this.selectedFile) return;
+  classifyBtn.disabled = true;
+  classifyBtn.textContent = 'Classifying...';
 
-      const token = localStorage.getItem("token");
-      if (!token) {
-        resultText.textContent = "⚠ Please log in again — token expired.";
-        resultBox.classList.remove("d-none");
-        return;
+  const token = localStorage.getItem("token");
+  if (!token) {
+    resultText.textContent = "⚠ Please log in again — token expired.";
+    resultBox.classList.remove("d-none");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('image', this.selectedFile);
+
+  try {
+    const response = await fetch(
+      "https://comp4537-projectserverside-e4hpapemggghh9ba.canadacentral-01.azurewebsites.net/api/ml/classify",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
       }
+    );
 
-      const formData = new FormData();
-      formData.append('image', this.selectedFile);
+    const data = await response.json();
+    console.log("🔍 RAW ML RESPONSE:", data);
+
+    // 🛡 Robust Parsing (Fixes ANY format)
+    if (data.model_output && Array.isArray(data.model_output)) {
+      let rawStr = data.model_output[0];      // → "[{'label': 'paper', 'confidence': 0.97}]"
+      
+      // FIX: Convert Python → Clean JSON
+      rawStr = rawStr.replace(/'/g, '"');     // ' → "
+      rawStr = rawStr.replace(/^\[|\]$/g, ''); // Remove [ ] brackets
 
       try {
-        const response = await fetch(
-          "https://comp4537-projectserverside-e4hpapemggghh9ba.canadacentral-01.azurewebsites.net/api/ml/classify",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json"
-            },
-            body: formData,
-            credentials: "include"
-          }
-        );
+        const parsed = JSON.parse(rawStr);   // SAFE PARSE
 
-        const data = await response.json();
-        console.log("🔍 ML RESPONSE:", data);
-
-        // ———————————— FIXED JSON PARSING ————————————
-        if (data.model_output && Array.isArray(data.model_output)) {
-          const raw = data.model_output[0];
-          const clean = raw.replace(/'/g, '"');     // ' → "
-          const parsed = JSON.parse(clean);         // Parse JSON
-
-          if (parsed.label && parsed.confidence !== undefined) {
-            resultText.textContent = `${parsed.label} (${(parsed.confidence * 100).toFixed(1)}%)`;
-          } else {
-            resultText.textContent = "⚠ Invalid output format";
-          }
-        } else {
-          resultText.textContent = "❌ No prediction returned.";
-        }
-
-        resultBox.classList.remove('d-none');
+        // Display result
+        resultText.textContent = `${parsed.label} (${(parsed.confidence * 100).toFixed(1)}%)`;
       } catch (err) {
-        resultText.textContent = `Server error: ${err.message}`;
-        resultBox.classList.remove('d-none');
+        resultText.textContent = "⚠ Failed to parse prediction.";
+        console.error("JSON PARSE ERROR:", err);
       }
+    } else {
+      resultText.textContent = "❌ No prediction returned.";
+    }
 
-      classifyBtn.disabled = false;
-      classifyBtn.textContent = 'Classify Image';
-    });
+    resultBox.classList.remove("d-none");
+  } catch (err) {
+    resultText.textContent = `Server error: ${err.message}`;
+    resultBox.classList.remove("d-none");
+  }
+
+  classifyBtn.disabled = false;
+  classifyBtn.textContent = 'Classify Image';
+});
+
   }
 
   handleFile(file) {
