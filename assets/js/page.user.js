@@ -5,7 +5,7 @@ class UserPage extends PageBase {
   constructor() {
     super('user-root');
     this.api = new AuthApi();
-    this.selectedFile = null;   // 👈 IMPORTANT
+    this.selectedFile = null;
   }
 
   init() {
@@ -19,8 +19,7 @@ class UserPage extends PageBase {
         </div>
 
         <div class="row mt-4 g-3">
-
-          <!-- LEFT CARD (API Usage) -->
+          <!-- LEFT CARD -->
           <div class="col-12 col-lg-5">
             <div class="card shadow-sm">
               <div class="card-body">
@@ -32,7 +31,7 @@ class UserPage extends PageBase {
             </div>
           </div>
 
-          <!-- RIGHT CARD (AI CLASSIFIER) -->
+          <!-- RIGHT CARD -->
           <div class="col-12 col-lg-7">
             <div class="card shadow-sm">
               <div class="card-body">
@@ -52,7 +51,6 @@ class UserPage extends PageBase {
                   <h5>Prediction:</h5>
                   <p id="resultText" class="fw-bold fs-5 text-success"></p>
                 </div>
-
               </div>
             </div>
           </div>
@@ -64,11 +62,10 @@ class UserPage extends PageBase {
     this.mountEvents();
   }
 
-  // IMAGE LOGIC
   setupClassifier() {
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
-    const preview   = document.getElementById('preview');
+    const preview = document.getElementById('preview');
     const classifyBtn = document.getElementById('classifyBtn');
     const resultText = document.getElementById('resultText');
     const resultBox = document.getElementById('resultBox');
@@ -84,46 +81,57 @@ class UserPage extends PageBase {
       this.handleFile(e.dataTransfer.files[0]);
     });
 
+    // CLASSIFY IMAGE
     classifyBtn.addEventListener('click', async () => {
       if (!this.selectedFile) return;
       classifyBtn.disabled = true;
       classifyBtn.textContent = 'Classifying...';
 
+      const token = localStorage.getItem("token");
+      if (!token) {
+        resultText.textContent = "⚠ Please log in again — token expired.";
+        resultBox.classList.remove("d-none");
+        return;
+      }
+
       const formData = new FormData();
       formData.append('image', this.selectedFile);
-      const token = localStorage.getItem("token");
 
       try {
-        const response = await fetch("https://comp4537-projectserverside-e4hpapemggghh9ba.canadacentral-01.azurewebsites.net/api/ml/classify", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData
-        });
+        const response = await fetch(
+          "https://comp4537-projectserverside-e4hpapemggghh9ba.canadacentral-01.azurewebsites.net/api/ml/classify",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json"
+            },
+            body: formData,
+            credentials: "include"
+          }
+        );
 
         const data = await response.json();
         console.log("🔍 ML RESPONSE:", data);
 
-if (data.model_output && Array.isArray(data.model_output)) {
-    // 1) take the first string
-    let raw = data.model_output[0]; 
-    console.log("RAW:", raw);  
+        // ———————————— FIXED JSON PARSING ————————————
+        if (data.model_output && Array.isArray(data.model_output)) {
+          const raw = data.model_output[0];
+          const clean = raw.replace(/'/g, '"');     // ' → "
+          const parsed = JSON.parse(clean);         // Parse JSON
 
-    // 2) convert Python → JSON properly  
-    let clean = raw
-      .replace(/'/g, '"')         // ' → "
-      .replace(/^\[|\]$/g, '');   // remove surrounding [  ]
+          if (parsed.label && parsed.confidence !== undefined) {
+            resultText.textContent = `${parsed.label} (${(parsed.confidence * 100).toFixed(1)}%)`;
+          } else {
+            resultText.textContent = "⚠ Invalid output format";
+          }
+        } else {
+          resultText.textContent = "❌ No prediction returned.";
+        }
 
-    console.log("CLEAN:", clean);
-
-    // 3) NOW parse safely
-    const parsed = JSON.parse(clean);
-
-    resultText.textContent = `${parsed.label} (${(parsed.confidence * 100).toFixed(1)}%)`;
-    resultBox.classList.remove('d-none');
-}
-
+        resultBox.classList.remove('d-none');
       } catch (err) {
-        resultText.textContent = "Error contacting server";
+        resultText.textContent = `Server error: ${err.message}`;
         resultBox.classList.remove('d-none');
       }
 
@@ -158,7 +166,6 @@ if (data.model_output && Array.isArray(data.model_output)) {
   }
 }
 
-// Bootstrap on load
 document.addEventListener('DOMContentLoaded', () => {
   new UserPage().init();
 });
