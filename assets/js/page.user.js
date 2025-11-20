@@ -112,23 +112,28 @@ classifyBtn.addEventListener('click', async () => {
     console.log("🔍 RAW ML RESPONSE:", data);
 
     // 🛡 Robust Parsing (Fixes ANY format)
-    if (data.model_output && Array.isArray(data.model_output)) {
-      let rawStr = data.model_output[0];      // → "[{'label': 'paper', 'confidence': 0.97}]"
-      
-      // FIX: Convert Python → Clean JSON
-      rawStr = rawStr.replace(/'/g, '"');     // ' → "
-      rawStr = rawStr.replace(/^\[|\]$/g, ''); // Remove [ ] brackets
+if (data.model_output && Array.isArray(data.model_output)) {
+  let rawStr = data.model_output[0];
 
-      try {
-        const parsed = JSON.parse(rawStr);   // SAFE PARSE
+  // NORMALIZE THE STRING
+  rawStr = rawStr.trim();
+  rawStr = rawStr.replace(/'/g, '"');         // single → double quotes
+  rawStr = rawStr.replace(/,\s*}/g, '}');     // remove trailing comma before }
+  rawStr = rawStr.replace(/,\s*]/g, ']');     // remove trailing comma before ]
+  rawStr = rawStr.replace(/\n/g, '');         // remove newlines
 
-        // Display result
-        resultText.textContent = `${parsed.label} (${(parsed.confidence * 100).toFixed(1)}%)`;
-      } catch (err) {
-        resultText.textContent = "⚠ Failed to parse prediction.";
-        console.error("JSON PARSE ERROR:", err);
-      }
-    } else {
+  console.log("🧹 CLEANED STRING:", rawStr);
+
+  try {
+    const parsed = JSON.parse(rawStr);  // FINAL ATTEMPT
+    resultText.textContent = `${parsed.label} (${(parsed.confidence * 100).toFixed(1)}%)`;
+
+  } catch (err) {
+    console.error("FINAL PARSE ERROR:", err);
+    resultText.textContent = "⚠ Could not parse model output.";
+  }
+}
+ else {
       resultText.textContent = "❌ No prediction returned.";
     }
 
