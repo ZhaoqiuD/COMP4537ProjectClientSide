@@ -18,15 +18,23 @@ class LoginPage {
     e.preventDefault();
     this.setError('');
     this.setBusy(true);
+<<<<<<< HEAD
 
     const email = document.getElementById('email')?.value?.trim();
     const password = document.getElementById('password')?.value ?? '';
 
+=======
+    const emailInput = document.getElementById('email');
+    const passInput = document.getElementById('password');
+    const email = emailInput?.value?.trim();
+    const password = passInput?.value ?? '';
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
     if (!email || !password) {
       this.setError('Please enter email and password.');
       this.setBusy(false);
       return;
     }
+<<<<<<< HEAD
 
     try {
       // login request
@@ -41,6 +49,13 @@ class LoginPage {
 
       // redirect based on role
       if (me.role === 'admin') {
+=======
+    try {
+      await this.api.login(email, password);
+      const me = await this.api.me();
+      SessionStore.setRole(me?.role || 'user');
+      if (me && me.role === 'admin') {
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
         window.location.href = 'admin.html';
       } else {
         window.location.href = 'user.html';
@@ -48,7 +63,10 @@ class LoginPage {
     } catch (err) {
       this.setError(err?.message || 'Login failed');
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
     this.setBusy(false);
   }
 
@@ -64,10 +82,16 @@ class LoginPage {
   }
 
   setBusy(busy) {
+<<<<<<< HEAD
     if (this.btn) {
       this.btn.disabled = !!busy;
       this.btn.innerText = busy ? 'Signing in…' : 'Login';
     }
+=======
+    if (!this.btn) return;
+    this.btn.disabled = !!busy;
+    this.btn.innerText = busy ? 'Signing in…' : 'Login';
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
   }
 }
 
@@ -77,3 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export default LoginPage;
+<<<<<<< HEAD
+=======
+// moved to client/
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d

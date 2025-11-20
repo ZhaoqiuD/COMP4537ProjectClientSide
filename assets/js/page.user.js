@@ -5,7 +5,10 @@ class UserPage extends PageBase {
   constructor() {
     super('user-root');
     this.api = new AuthApi();
+<<<<<<< HEAD
     this.selectedFile = null;
+=======
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
   }
 
   init() {
@@ -14,11 +17,17 @@ class UserPage extends PageBase {
       <section>
         <div class="d-flex align-items-center justify-content-between">
           <h1 class="h4 mb-0">Welcome</h1>
+<<<<<<< HEAD
           <button id="btnLogout" class="btn btn-outline-danger btn-sm">Logout</button>
         </div>
 
         <div class="row mt-4 g-3">
           <div class="col-12 col-lg-5">
+=======
+        </div>
+        <div class="row mt-3 g-3">
+          <div class="col-12 col-lg-8">
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
             <div class="card shadow-sm">
               <div class="card-body">
                 <h2 class="h6">Your API Usage</h2>
@@ -28,6 +37,7 @@ class UserPage extends PageBase {
               </div>
             </div>
           </div>
+<<<<<<< HEAD
 
           <div class="col-12 col-lg-7">
             <div class="card shadow-sm">
@@ -49,6 +59,14 @@ class UserPage extends PageBase {
                   <h5>Prediction:</h5>
                   <p id="resultText" class="fw-bold fs-5 text-success"></p>
                 </div>
+=======
+          <div class="col-12 col-lg-4">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h2 class="h6">Quick Links</h2>
+                <p class="mb-2"><a href="#" class="link-secondary">Upload an image (coming soon)</a></p>
+                <p class="mb-0 text-muted">Your teammate can wire ML here.</p>
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
               </div>
             </div>
           </div>
@@ -56,6 +74,7 @@ class UserPage extends PageBase {
       </section>
     `;
 
+<<<<<<< HEAD
     this.setupClassifier();
     this.mountEvents();
   }
@@ -159,6 +178,11 @@ this.showResult(
     resultBox.classList.remove("d-none");
   }
 
+=======
+    this.mountEvents();
+  }
+
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
   mountEvents() {
     const btnLogout = document.getElementById('btnLogout');
     if (btnLogout) {
@@ -170,9 +194,17 @@ this.showResult(
   }
 }
 
+<<<<<<< HEAD
+=======
+// Bootstrap page
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
 document.addEventListener('DOMContentLoaded', () => {
   const page = new UserPage();
   page.init();
 });
 
 export default UserPage;
+<<<<<<< HEAD
+=======
+// moved to client/
+>>>>>>> 6b6718be37d294293ae5a03b0cad3ecd5b4e8a2d
