@@ -13,19 +13,19 @@ class UserPage extends PageBase {
 
     this.root.innerHTML = `
       <section>
-        <div class="d-flex align-items-center justify-content-between">
-          <h1 class="h4 mb-0">Welcome</h1>
-          <button id="btnLogout" class="btn btn-outline-danger btn-sm">Logout</button>
-        </div>
-
-        <div class="row mt-4 g-3">
+        <div class="row g-4">
           <!-- LEFT CARD -->
           <div class="col-12 col-lg-5">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm h-100">
               <div class="card-body">
-                <h2 class="h6">Your API Usage</h2>
-                <div id="user-usage" class="usage-box mt-2">
-                  <em class="text-muted">API usage will appear here.</em>
+                <h2 class="h5 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-graph-up" viewBox="0 0 16 16" style="margin-bottom: 3px;">
+                    <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07Z"/>
+                  </svg>
+                  Your API Usage
+                </h2>
+                <div id="user-usage" class="usage-box">
+                  <em class="text-muted">Loading API usage...</em>
                 </div>
               </div>
             </div>
@@ -33,22 +33,44 @@ class UserPage extends PageBase {
 
           <!-- RIGHT CARD -->
           <div class="col-12 col-lg-7">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm h-100">
               <div class="card-body">
-                <h2 class="h6">AI Garbage Classifier</h2>
+                <h2 class="h5 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cpu" viewBox="0 0 16 16" style="margin-bottom: 3px;">
+                    <path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zm-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/>
+                  </svg>
+                  AI Garbage Classifier
+                </h2>
 
                 <div id="dropZone" class="drop-zone">
-                  <p class="mb-0">Drag & drop an image here, or click to select</p>
+                  <p class="mb-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cloud-arrow-up mb-2" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M7.646 5.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2z"/>
+                      <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z"/>
+                    </svg>
+                    <br />
+                    Drag & drop an image here, or click to select
+                  </p>
                   <input type="file" id="fileInput" accept="image/*" hidden />
                   <img id="preview" class="preview-img d-none" />
                 </div>
 
                 <div class="text-center mt-3">
-                  <button id="classifyBtn" class="btn btn-primary" disabled>Classify Image</button>
+                  <button id="classifyBtn" class="btn btn-primary btn-lg px-4" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightning-charge-fill" viewBox="0 0 16 16" style="margin-bottom: 2px;">
+                      <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
+                    </svg>
+                    Classify Image
+                  </button>
                 </div>
 
                 <div id="resultBox" class="text-center mt-4 d-none">
-                  <h5>Prediction:</h5>
+                  <h5>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16" style="margin-bottom: 2px;">
+                      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                    </svg>
+                    Prediction Result
+                  </h5>
                   <p id="resultText" class="fw-bold fs-5 text-success"></p>
                 </div>
               </div>
