@@ -95,27 +95,20 @@ class UserPage extends PageBase {
         const isOverLimit = used >= limit;
         
         usageBox.innerHTML = `
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <strong style="font-size: 1.1rem;">API Calls:</strong> 
-              <span style="font-size: 1.1rem;">${used} / ${limit}</span>
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-nowrap">
+            <div class="text-nowrap me-3">
+              <strong>API Calls:</strong> ${used} / ${limit}
             </div>
-            <div>
-              <span class="badge ${isOverLimit ? 'bg-warning text-dark' : 'bg-success'}" style="font-size: 0.9rem; padding: 0.4rem 0.8rem;">${percentage}%</span>
-              ${isOverLimit ? '<span class="badge bg-danger ms-2" style="font-size: 0.9rem; padding: 0.4rem 0.8rem;">⚠</span>' : ''}
-            </div>
-          </div>
-          <div class="progress mb-2" style="height: 15px; background-color: #e9ecef;">
-            <div class="progress-bar ${isOverLimit ? 'bg-warning' : 'bg-success'}" 
-                 role="progressbar" 
-                 style="width: ${Math.min(percentage, 100)}%"
-                 aria-valuenow="${used}" 
-                 aria-valuemin="0" 
-                 aria-valuemax="${limit}">
+            <div class="d-flex gap-2 flex-shrink-0">
+              <span class="badge ${isOverLimit ? 'bg-warning text-dark' : 'bg-success'}">${percentage}%</span>
+              ${isOverLimit ? '<span class="badge bg-danger">⚠</span>' : ''}
             </div>
           </div>
-          ${isOverLimit ? '<div class="alert alert-warning py-2 px-3 mb-0" style="font-size: 0.85rem;"><strong>⚠️ Quota Reached:</strong> Free API limit reached. Service continues but please upgrade.</div>' : ''}
-          ${data.warning ? `<div class="alert alert-warning py-2 px-3 mb-0 mt-2" style="font-size: 0.85rem;">${data.warning}</div>` : ''}
+          <div class="progress" role="progressbar" aria-label="API Usage" aria-valuenow="${used}" aria-valuemin="0" aria-valuemax="${limit}" style="height: 20px;">
+            <div class="progress-bar ${isOverLimit ? 'bg-warning' : 'bg-success'}" style="width: ${Math.min(percentage, 100)}%"></div>
+          </div>
+          ${isOverLimit ? '<div class="alert alert-warning py-2 px-3 mb-0 mt-3"><small><strong>⚠️ Quota Reached:</strong> Free API limit reached. Service continues but please upgrade.</small></div>' : ''}
+          ${data.warning ? `<div class="alert alert-warning py-2 px-3 mb-0 mt-2"><small>${data.warning}</small></div>` : ''}
         `;
       } else {
         usageBox.innerHTML = '<em class="text-muted">Usage data unavailable</em>';
