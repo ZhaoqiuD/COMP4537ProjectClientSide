@@ -95,18 +95,22 @@ class UserPage extends PageBase {
         const isOverLimit = used >= limit;
         
         usageBox.innerHTML = `
-          <div class="mb-2">
-            <strong>API Calls:</strong> ${used} / ${limit}
-            ${isOverLimit ? '<span class="badge bg-warning ms-2">Quota Reached</span>' : ''}
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <strong>API Calls:</strong> ${used} / ${limit}
+            </div>
+            <div>
+              <span class="badge ${isOverLimit ? 'bg-warning' : 'bg-success'}">${percentage}%</span>
+              ${isOverLimit ? '<span class="badge bg-danger ms-1">Quota Reached</span>' : ''}
+            </div>
           </div>
-          <div class="progress" style="height: 20px;">
+          <div class="progress" style="height: 10px;">
             <div class="progress-bar ${isOverLimit ? 'bg-warning' : 'bg-success'}" 
                  role="progressbar" 
                  style="width: ${Math.min(percentage, 100)}%"
                  aria-valuenow="${used}" 
                  aria-valuemin="0" 
                  aria-valuemax="${limit}">
-              ${percentage}%
             </div>
           </div>
           ${isOverLimit ? '<p class="text-warning mt-2 mb-0"><small>⚠️ Free API quota reached. Service continues but please upgrade.</small></p>' : ''}
