@@ -6,6 +6,7 @@ class UserPage extends PageBase {
     super('user-root');
     this.api = new AuthApi();
     this.selectedFile = null;
+    this.isOverLimit = false;
   }
 
   init() {
@@ -94,28 +95,63 @@ class UserPage extends PageBase {
         const percentage = Math.round((used / limit) * 100);
         const isOverLimit = used >= limit;
         
+        // Store the limit state
+        this.isOverLimit = isOverLimit;
+        
         usageBox.innerHTML = `
-          <div class="d-flex justify-content-between align-items-center mb-3 flex-nowrap">
-            <div class="text-nowrap me-3">
-              <strong>API Calls:</strong> ${used} / ${limit}
-            </div>
-            <div class="d-flex gap-2 flex-shrink-0">
-              <span class="badge ${isOverLimit ? 'bg-warning text-dark' : 'bg-success'}">${percentage}%</span>
-              ${isOverLimit ? '<span class="badge bg-danger">⚠</span>' : ''}
+          <div class="usage-header">
+            <div class="usage-text">API Calls: ${used} / ${limit}</div>
+            <div class="usage-badges">
+              <span class="usage-badge ${isOverLimit ? 'warning' : 'success'}">${percentage}%</span>
+              ${isOverLimit ? '<span class="usage-badge danger">⚠</span>' : ''}
             </div>
           </div>
-          <div class="progress" role="progressbar" aria-label="API Usage" aria-valuenow="${used}" aria-valuemin="0" aria-valuemax="${limit}" style="height: 20px;">
-            <div class="progress-bar ${isOverLimit ? 'bg-warning' : 'bg-success'}" style="width: ${Math.min(percentage, 100)}%"></div>
+          <div class="usage-progress-bar">
+            <div class="usage-progress-fill ${isOverLimit ? 'warning' : 'success'}" style="width: ${Math.min(percentage, 100)}%"></div>
           </div>
-          ${isOverLimit ? '<div class="alert alert-warning py-2 px-3 mb-0 mt-3"><small><strong>⚠️ Quota Reached:</strong> Free API limit reached. Service continues but please upgrade.</small></div>' : ''}
-          ${data.warning ? `<div class="alert alert-warning py-2 px-3 mb-0 mt-2"><small>${data.warning}</small></div>` : ''}
+          ${isOverLimit ? '<div class="usage-alert"><strong>⚠️ Quota Reached:</strong> Free API limit reached. Please upgrade to continue.</div>' : ''}
+          ${data.warning ? `<div class="usage-alert">${data.warning}</div>` : ''}
         `;
+        
+        // Update button state
+        this.updateClassifyButton();
       } else {
         usageBox.innerHTML = '<em class="text-muted">Usage data unavailable</em>';
       }
     } catch (err) {
       console.error('Failed to load usage:', err);
       usageBox.innerHTML = '<em class="text-danger">Failed to load usage data</em>';
+    }
+  }
+  
+  updateClassifyButton() {
+    const classifyBtn = document.getElementById('classifyBtn');
+    if (classifyBtn) {
+      if (this.isOverLimit) {
+        classifyBtn.disabled = true;
+        classifyBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16" style="margin-bottom: 2px;">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+          </svg>
+          Quota Reached
+        `;
+      } else if (!this.selectedFile) {
+        classifyBtn.disabled = true;
+        classifyBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightning-charge-fill" viewBox="0 0 16 16" style="margin-bottom: 2px;">
+            <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
+          </svg>
+          Classify Image
+        `;
+      } else {
+        classifyBtn.disabled = false;
+        classifyBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightning-charge-fill" viewBox="0 0 16 16" style="margin-bottom: 2px;">
+            <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
+          </svg>
+          Classify Image
+        `;
+      }
     }
   }
 
@@ -139,81 +175,80 @@ class UserPage extends PageBase {
     });
 
     // CLASSIFY IMAGE
-// CLASSIFY IMAGE
-classifyBtn.addEventListener('click', async () => {
-  if (!this.selectedFile) return;
-  classifyBtn.disabled = true;
-  classifyBtn.textContent = 'Classifying...';
+    classifyBtn.addEventListener('click', async () => {
+      if (!this.selectedFile || this.isOverLimit) return;
+      
+      classifyBtn.disabled = true;
+      classifyBtn.textContent = 'Classifying...';
 
-  const token = localStorage.getItem("token");
-  if (!token) {
-    resultText.textContent = "⚠ Please log in again — token expired.";
-    resultBox.classList.remove("d-none");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('image', this.selectedFile);
-
-  try {
-    const response = await fetch(
-      "https://comp4537-projectserverside-e4hpapemggghh9ba.canadacentral-01.azurewebsites.net/api/ml/classify",
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
+      const token = localStorage.getItem("token");
+      if (!token) {
+        resultText.textContent = "⚠ Please log in again — token expired.";
+        resultBox.classList.remove("d-none");
+        this.updateClassifyButton();
+        return;
       }
-    );
 
-    const data = await response.json();
-    console.log("🔍 RAW ML RESPONSE:", data);
+      const formData = new FormData();
+      formData.append('image', this.selectedFile);
 
-    // 🔄 Refresh usage counter after classification
-    this.loadUsage();
+      try {
+        const response = await fetch(
+          "https://comp4537-projectserverside-e4hpapemggghh9ba.canadacentral-01.azurewebsites.net/api/ml/classify",
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData
+          }
+        );
 
-    // 🛡 Robust Parsing (Fixes ANY format)
-if (data.model_output && Array.isArray(data.model_output)) {
-  let rawStr = data.model_output[0];
+        const data = await response.json();
+        console.log("🔍 RAW ML RESPONSE:", data);
 
-  // NORMALIZE THE STRING
-  rawStr = rawStr.trim();
-  rawStr = rawStr.replace(/'/g, '"');         // single → double quotes
-  rawStr = rawStr.replace(/,\s*}/g, '}');     // remove trailing comma before }
-  rawStr = rawStr.replace(/,\s*]/g, ']');     // remove trailing comma before ]
-  rawStr = rawStr.replace(/\n/g, '');         // remove newlines
+        // 🔄 Refresh usage counter after classification
+        await this.loadUsage();
 
-  console.log("🧹 CLEANED STRING:", rawStr);
+        // 🛡 Robust Parsing (Fixes ANY format)
+        if (data.model_output && Array.isArray(data.model_output)) {
+          let rawStr = data.model_output[0];
 
-try {
-  const parsed = JSON.parse(rawStr);
+          // NORMALIZE THE STRING
+          rawStr = rawStr.trim();
+          rawStr = rawStr.replace(/'/g, '"');         // single → double quotes
+          rawStr = rawStr.replace(/,\s*}/g, '}');     // remove trailing comma before }
+          rawStr = rawStr.replace(/,\s*]/g, ']');     // remove trailing comma before ]
+          rawStr = rawStr.replace(/\n/g, '');         // remove newlines
 
-  if (Array.isArray(parsed) && parsed.length > 0) {
-    // Get BEST prediction
-    const best = parsed.reduce((a, b) => (a.confidence > b.confidence ? a : b));
+          console.log("🧹 CLEANED STRING:", rawStr);
 
-    resultText.textContent = `${best.label} (${(best.confidence * 100).toFixed(1)}%)`;
-  } else {
-    resultText.textContent = "⚠ Could not understand model output.";
-  }
-} catch (err) {
-  console.error("FINAL PARSE ERROR:", err);
-  resultText.textContent = "⚠ Could not parse model output.";
-}
+          try {
+            const parsed = JSON.parse(rawStr);
 
-}
- else {
-      resultText.textContent = "❌ No prediction returned.";
-    }
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              // Get BEST prediction
+              const best = parsed.reduce((a, b) => (a.confidence > b.confidence ? a : b));
 
-    resultBox.classList.remove("d-none");
-  } catch (err) {
-    resultText.textContent = `Server error: ${err.message}`;
-    resultBox.classList.remove("d-none");
-  }
+              resultText.textContent = `${best.label} (${(best.confidence * 100).toFixed(1)}%)`;
+            } else {
+              resultText.textContent = "⚠ Could not understand model output.";
+            }
+          } catch (err) {
+            console.error("FINAL PARSE ERROR:", err);
+            resultText.textContent = "⚠ Could not parse model output.";
+          }
 
-  classifyBtn.disabled = false;
-  classifyBtn.textContent = 'Classify Image';
-});
+        } else {
+          resultText.textContent = "❌ No prediction returned.";
+        }
+
+        resultBox.classList.remove("d-none");
+      } catch (err) {
+        resultText.textContent = `Server error: ${err.message}`;
+        resultBox.classList.remove("d-none");
+      }
+
+      this.updateClassifyButton();
+    });
 
   }
 
@@ -230,7 +265,8 @@ handleFile(file) {
   };
   reader.readAsDataURL(file);
 
-  document.getElementById('classifyBtn').disabled = false;
+  // Update button state based on usage limit
+  this.updateClassifyButton();
 }
 
 
