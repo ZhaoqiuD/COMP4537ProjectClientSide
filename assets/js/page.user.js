@@ -95,16 +95,17 @@ class UserPage extends PageBase {
         const isOverLimit = used >= limit;
         
         usageBox.innerHTML = `
-          <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-              <strong>API Calls:</strong> ${used} / ${limit}
+              <strong style="font-size: 1.1rem;">API Calls:</strong> 
+              <span style="font-size: 1.1rem;">${used} / ${limit}</span>
             </div>
             <div>
-              <span class="badge ${isOverLimit ? 'bg-warning' : 'bg-success'}">${percentage}%</span>
-              ${isOverLimit ? '<span class="badge bg-danger ms-1">Quota Reached</span>' : ''}
+              <span class="badge ${isOverLimit ? 'bg-warning text-dark' : 'bg-success'}" style="font-size: 0.9rem; padding: 0.4rem 0.8rem;">${percentage}%</span>
+              ${isOverLimit ? '<span class="badge bg-danger ms-2" style="font-size: 0.9rem; padding: 0.4rem 0.8rem;">⚠</span>' : ''}
             </div>
           </div>
-          <div class="progress" style="height: 10px;">
+          <div class="progress mb-2" style="height: 15px; background-color: #e9ecef;">
             <div class="progress-bar ${isOverLimit ? 'bg-warning' : 'bg-success'}" 
                  role="progressbar" 
                  style="width: ${Math.min(percentage, 100)}%"
@@ -113,8 +114,8 @@ class UserPage extends PageBase {
                  aria-valuemax="${limit}">
             </div>
           </div>
-          ${isOverLimit ? '<p class="text-warning mt-2 mb-0"><small>⚠️ Free API quota reached. Service continues but please upgrade.</small></p>' : ''}
-          ${data.warning ? `<p class="text-warning mt-2 mb-0"><small>⚠️ ${data.warning}</small></p>` : ''}
+          ${isOverLimit ? '<div class="alert alert-warning py-2 px-3 mb-0" style="font-size: 0.85rem;"><strong>⚠️ Quota Reached:</strong> Free API limit reached. Service continues but please upgrade.</div>' : ''}
+          ${data.warning ? `<div class="alert alert-warning py-2 px-3 mb-0 mt-2" style="font-size: 0.85rem;">${data.warning}</div>` : ''}
         `;
       } else {
         usageBox.innerHTML = '<em class="text-muted">Usage data unavailable</em>';
