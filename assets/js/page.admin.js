@@ -1,26 +1,46 @@
 import PageBase from './page.base.js';
 import AuthApi from './authApi.js';
-import config from './config.js';
+import { Config } from './config.js';  // FIX 1: Import Config with capital C
 
 class AdminPage extends PageBase {
   constructor() {
     super('admin-root');
+    console.log('AdminPage constructor called');
     this.api = new AuthApi();
-    // Use your actual server URL
-    this.API_URL = config.API_URL || 'http://localhost:3000';
+    // FIX 2: Use Config.apiBaseUrl
+    this.API_URL = Config.apiBaseUrl || 'http://localhost:3000';
+    console.log('API URL:', this.API_URL);
   }
 
   async init() {
-    if (!this.root) return;
+    console.log('AdminPage init called');
+    console.log('Root element:', this.root);
     
-    // Render the dashboard structure
-    this.renderDashboard();
+    if (!this.root) {
+      console.error('No root element found! Looking for element with id="admin-root"');
+      return;
+    }
     
-    // Load and display the data
-    await this.loadStatistics();
-    
-    // Mount logout button
-    this.mountEvents();
+    try {
+      // Render the dashboard structure FIRST
+      console.log('Rendering dashboard...');
+      this.renderDashboard();
+      
+      // Then load statistics
+      console.log('Loading statistics...');
+      await this.loadStatistics();
+      
+      // Mount events
+      this.mountEvents();
+    } catch (error) {
+      console.error('Error in init:', error);
+      // Even if there's an error, at least show something
+      this.root.innerHTML = `
+        <div class="alert alert-danger">
+          Error loading admin dashboard: ${error.message}
+        </div>
+      `;
+    }
   }
 
   renderDashboard() {
@@ -80,40 +100,52 @@ class AdminPage extends PageBase {
   async loadStatistics() {
     // Load endpoint statistics
     try {
+      console.log('Fetching endpoint stats from:', `${this.API_URL}/api/admin/stats`);
       const endpointResponse = await fetch(`${this.API_URL}/api/admin/stats`, {
         method: 'GET',
         credentials: 'include'
       });
+      
+      console.log('Endpoint stats response:', endpointResponse.status);
 
       if (endpointResponse.ok) {
         const data = await endpointResponse.json();
+        console.log('Endpoint stats data:', data);
         this.displayEndpointStats(data.endpoints || []);
       } else {
-        console.error('Failed to load endpoint stats');
+        console.error('Failed to load endpoint stats:', endpointResponse.status);
         document.getElementById('endpoint-stats').innerHTML = 
-          '<tr><td colspan="3" class="text-center text-danger">Failed to load statistics</td></tr>';
+          '<tr><td colspan="3" class="text-center text-danger">Failed to load statistics (HTTP ' + endpointResponse.status + ')</td></tr>';
       }
     } catch (error) {
       console.error('Error loading endpoint stats:', error);
+      document.getElementById('endpoint-stats').innerHTML = 
+        '<tr><td colspan="3" class="text-center text-danger">Error: ' + error.message + '</td></tr>';
     }
 
     // Load user statistics
     try {
+      console.log('Fetching user stats from:', `${this.API_URL}/api/admin/users`);
       const userResponse = await fetch(`${this.API_URL}/api/admin/users`, {
         method: 'GET',
         credentials: 'include'
       });
+      
+      console.log('User stats response:', userResponse.status);
 
       if (userResponse.ok) {
         const data = await userResponse.json();
+        console.log('User stats data:', data);
         this.displayUserStats(data.users || []);
       } else {
-        console.error('Failed to load user stats');
+        console.error('Failed to load user stats:', userResponse.status);
         document.getElementById('user-stats').innerHTML = 
-          '<tr><td colspan="3" class="text-center text-danger">Failed to load user statistics</td></tr>';
+          '<tr><td colspan="3" class="text-center text-danger">Failed to load user statistics (HTTP ' + userResponse.status + ')</td></tr>';
       }
     } catch (error) {
       console.error('Error loading user stats:', error);
+      document.getElementById('user-stats').innerHTML = 
+        '<tr><td colspan="3" class="text-center text-danger">Error: ' + error.message + '</td></tr>';
     }
   }
 
@@ -166,10 +198,11 @@ class AdminPage extends PageBase {
   }
 }
 
-// Bootstrap page
+// Bootstrap page - FIX 3: Make sure init() is actually called
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded fired for admin page');
   const page = new AdminPage();
-  page.init();
+  page.init();  // Make sure we call init()!
 });
 
 export default AdminPage;
