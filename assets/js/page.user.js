@@ -109,7 +109,7 @@ class UserPage extends PageBase {
           <div class="usage-progress-bar">
             <div class="usage-progress-fill ${isOverLimit ? 'warning' : 'success'}" style="width: ${Math.min(percentage, 100)}%"></div>
           </div>
-          ${isOverLimit ? '<div class="usage-alert"><strong>⚠️ Quota Reached:</strong> Free API limit reached. Please upgrade to continue.</div>' : ''}
+          ${isOverLimit ? '<div class="usage-alert"><strong>⚠️ Quota Reached:</strong> Free API limit reached.</div>' : ''}
           ${data.warning ? `<div class="usage-alert">${data.warning}</div>` : ''}
         `;
         
