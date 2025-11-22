@@ -81,7 +81,44 @@ class UserPage extends PageBase {
     `;
 
     this.setupClassifier();
+    this.loadUsage();
     this.mountEvents();
+  }
+
+  async loadUsage() {
+    const usageBox = document.getElementById('user-usage');
+    try {
+      const data = await this.api.me();
+      if (data && data.usage) {
+        const { used, limit } = data.usage;
+        const percentage = Math.round((used / limit) * 100);
+        const isOverLimit = used >= limit;
+        
+        usageBox.innerHTML = `
+          <div class="mb-2">
+            <strong>API Calls:</strong> ${used} / ${limit}
+            ${isOverLimit ? '<span class="badge bg-warning ms-2">Quota Reached</span>' : ''}
+          </div>
+          <div class="progress" style="height: 20px;">
+            <div class="progress-bar ${isOverLimit ? 'bg-warning' : 'bg-success'}" 
+                 role="progressbar" 
+                 style="width: ${Math.min(percentage, 100)}%"
+                 aria-valuenow="${used}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="${limit}">
+              ${percentage}%
+            </div>
+          </div>
+          ${isOverLimit ? '<p class="text-warning mt-2 mb-0"><small>⚠️ Free API quota reached. Service continues but please upgrade.</small></p>' : ''}
+          ${data.warning ? `<p class="text-warning mt-2 mb-0"><small>⚠️ ${data.warning}</small></p>` : ''}
+        `;
+      } else {
+        usageBox.innerHTML = '<em class="text-muted">Usage data unavailable</em>';
+      }
+    } catch (err) {
+      console.error('Failed to load usage:', err);
+      usageBox.innerHTML = '<em class="text-danger">Failed to load usage data</em>';
+    }
   }
 
   setupClassifier() {
@@ -132,6 +169,9 @@ classifyBtn.addEventListener('click', async () => {
 
     const data = await response.json();
     console.log("🔍 RAW ML RESPONSE:", data);
+
+    // 🔄 Refresh usage counter after classification
+    this.loadUsage();
 
     // 🛡 Robust Parsing (Fixes ANY format)
 if (data.model_output && Array.isArray(data.model_output)) {
