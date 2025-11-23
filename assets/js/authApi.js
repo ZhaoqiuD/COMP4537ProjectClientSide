@@ -47,14 +47,38 @@ async me() {
   });
 }
 
-async logout() {
-  const res = await this.#fetchJson('/api/auth/logout', {
-    method: 'POST',
-    credentials: 'include'
-  });
-  SessionStore.clear();
-  return res;
-}
+  async logout() {
+    const res = await this.#fetchJson('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+    SessionStore.clear();
+    return res;
+  }
+
+  // ----- Classifications (versioned) -----
+  async listClassifications() {
+    return this.#fetchJson('/api/v1/classifications', {
+      method: 'GET',
+      credentials: 'include'
+    });
+  }
+
+  async updateClassification(id, payload) {
+    return this.#fetchJson(`/api/v1/classifications/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async deleteClassification(id) {
+    return this.#fetchJson(`/api/v1/classifications/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+  }
 
 
   async #handle(res) {
