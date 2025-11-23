@@ -1,4 +1,5 @@
 import AuthApi from './authApi.js';
+import { Messages } from './messages.js';
 
 class RegisterPage {
   constructor() {
@@ -24,7 +25,7 @@ class RegisterPage {
     const email = emailInput?.value?.trim();
     const password = passInput?.value ?? '';
     if (!firstName || !email || !password) {
-      this.setError('Please enter first name, email and password.');
+      this.setError(Messages.registerMissing);
       this.setBusy(false);
       return;
     }
@@ -33,7 +34,7 @@ class RegisterPage {
       // After successful registration, go to login
       window.location.href = 'login.html';
     } catch (err) {
-      this.setError(err?.message || 'Registration failed');
+      this.setError(err?.message || Messages.registerFailed);
     }
     this.setBusy(false);
   }

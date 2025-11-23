@@ -1,5 +1,6 @@
 import AuthApi from './authApi.js';
 import SessionStore from './session.js';
+import { Messages } from './messages.js';
 
 class LoginPage {
   constructor() {
@@ -23,7 +24,7 @@ class LoginPage {
     const password = document.getElementById('password')?.value ?? '';
 
     if (!email || !password) {
-      this.setError('Please enter email and password.');
+      this.setError(Messages.loginMissing);
       this.setBusy(false);
       return;
     }
@@ -46,9 +47,9 @@ class LoginPage {
         ? 'admin.html'
         : 'user.html';
 
-    } catch (err) {
-      this.setError(err?.message || 'Login failed');
-    }
+      } catch (err) {
+        this.setError(err?.message || Messages.loginFailed);
+      }
 
     this.setBusy(false);
   }

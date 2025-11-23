@@ -127,15 +127,7 @@ class UserPage extends PageBase {
   updateClassifyButton() {
     const classifyBtn = document.getElementById('classifyBtn');
     if (classifyBtn) {
-      if (this.isOverLimit) {
-        classifyBtn.disabled = true;
-        classifyBtn.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16" style="margin-bottom: 2px;">
-            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
-          </svg>
-          Quota Reached
-        `;
-      } else if (!this.selectedFile) {
+      if (!this.selectedFile) {
         classifyBtn.disabled = true;
         classifyBtn.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightning-charge-fill" viewBox="0 0 16 16" style="margin-bottom: 2px;">
@@ -145,12 +137,25 @@ class UserPage extends PageBase {
         `;
       } else {
         classifyBtn.disabled = false;
-        classifyBtn.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightning-charge-fill" viewBox="0 0 16 16" style="margin-bottom: 2px;">
-            <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
-          </svg>
-          Classify Image
-        `;
+        if (this.isOverLimit) {
+          classifyBtn.classList.remove('btn-primary');
+          classifyBtn.classList.add('btn-warning');
+          classifyBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16" style="margin-bottom: 2px;">
+              <path d="M8.982 1.566a1.13 1.13 0 0 0-1.964 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.707c.89 0 1.439-.99.982-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+            </svg>
+            Classify Image (over free quota)
+          `;
+        } else {
+          classifyBtn.classList.remove('btn-warning');
+          classifyBtn.classList.add('btn-primary');
+          classifyBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightning-charge-fill" viewBox="0 0 16 16" style="margin-bottom: 2px;">
+              <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
+            </svg>
+            Classify Image
+          `;
+        }
       }
     }
   }
@@ -176,7 +181,7 @@ class UserPage extends PageBase {
 
     // CLASSIFY IMAGE
     classifyBtn.addEventListener('click', async () => {
-      if (!this.selectedFile || this.isOverLimit) return;
+      if (!this.selectedFile) return;
       
       classifyBtn.disabled = true;
       classifyBtn.textContent = 'Classifying...';
