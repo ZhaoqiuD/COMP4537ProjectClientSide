@@ -98,57 +98,68 @@ class AdminPage extends PageBase {
     `;
   }
 
-  async loadStatistics() {
-    // Load endpoint statistics
-    try {
-      console.log('Fetching endpoint stats from:', `${this.API_URL}/api/admin/stats`);
-      const endpointResponse = await fetch(`${this.API_URL}/api/admin/stats`, {
-        method: 'GET',
-        credentials: 'include'
-      });
-      
-      console.log('Endpoint stats response:', endpointResponse.status);
-
-      if (endpointResponse.ok) {
-        const data = await endpointResponse.json();
-        console.log('Endpoint stats data:', data);
-        this.displayEndpointStats(data.endpoints || []);
-      } else {
-        console.error('Failed to load endpoint stats:', endpointResponse.status);
-        document.getElementById('endpoint-stats').innerHTML = 
-          '<tr><td colspan="3" class="text-center text-danger">Failed to load statistics (HTTP ' + endpointResponse.status + ')</td></tr>';
-      }
-    } catch (error) {
-      console.error('Error loading endpoint stats:', error);
-      document.getElementById('endpoint-stats').innerHTML = 
-        '<tr><td colspan="3" class="text-center text-danger">Error: ' + error.message + '</td></tr>';
-    }
-
-    // Load user statistics
-    try {
-      console.log('Fetching user stats from:', `${this.API_URL}/api/admin/users`);
-      const userResponse = await fetch(`${this.API_URL}/api/admin/users`, {
-        method: 'GET',
-        credentials: 'include'
-      });
-      
-      console.log('User stats response:', userResponse.status);
-
-      if (userResponse.ok) {
-        const data = await userResponse.json();
-        console.log('User stats data:', data);
-        this.displayUserStats(data.users || []);
-      } else {
-        console.error('Failed to load user stats:', userResponse.status);
-        document.getElementById('user-stats').innerHTML = 
-          '<tr><td colspan="3" class="text-center text-danger">Failed to load user statistics (HTTP ' + userResponse.status + ')</td></tr>';
-      }
-    } catch (error) {
-      console.error('Error loading user stats:', error);
-      document.getElementById('user-stats').innerHTML = 
-        '<tr><td colspan="3" class="text-center text-danger">Error: ' + error.message + '</td></tr>';
-    }
+ async loadStatistics() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("You must be logged in as admin!");
+    window.location.href = "login.html";
+    return;
   }
+
+  // ---- 1) Load endpoint stats ----
+  try {
+    const endpointResponse = await fetch(`${this.API_URL}/api/admin/stats`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    });
+
+    if (endpointResponse.ok) {
+      const data = await endpointResponse.json();
+      this.displayEndpointStats(data.endpoints || []);
+    } else if (endpointResponse.status === 401 || endpointResponse.status === 403) {
+      alert("Unauthorized. Please log in as admin.");
+      window.location.href = "login.html";
+      return;
+    } else {
+      document.getElementById('endpoint-stats').innerHTML =
+        `<tr><td colspan="3" class="text-center text-danger">HTTP ${endpointResponse.status}</td></tr>`;
+    }
+  } catch (error) {
+    document.getElementById('endpoint-stats').innerHTML =
+      `<tr><td colspan="3" class="text-center text-danger">${error.message}</td></tr>`;
+  }
+
+  // ---- 2) Load user stats ----
+  try {
+    const userResponse = await fetch(`${this.API_URL}/api/admin/users`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    });
+
+    if (userResponse.ok) {
+      const data = await userResponse.json();
+      this.displayUserStats(data.users || []);
+    } else if (userResponse.status === 401 || userResponse.status === 403) {
+      alert("Unauthorized. Please log in as admin.");
+      window.location.href = "login.html";
+      return;
+    } else {
+      document.getElementById('user-stats').innerHTML =
+        `<tr><td colspan="3" class="text-center text-danger">HTTP ${userResponse.status}</td></tr>`;
+    }
+  } catch (error) {
+    document.getElementById('user-stats').innerHTML =
+      `<tr><td colspan="3" class="text-center text-danger">${error.message}</td></tr>`;
+  }
+}
 
   displayEndpointStats(endpoints) {
     const tbody = document.getElementById('endpoint-stats');
