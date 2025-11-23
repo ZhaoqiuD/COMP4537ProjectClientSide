@@ -7,7 +7,7 @@ export const Config = Object.freeze({
 
   // apiBaseUrl: 'https://comp4537projectserverside-qzcq.onrender.com/api'
   apiBaseUrl: 'https://comp4537-projectserverside-e4hpapemggghh9ba.canadacentral-01.azurewebsites.net',
-  apiBaseUrl: "http://127.0.0.1:3000",
+  // apiBaseUrl: "http://127.0.0.1:3000",
 //  apiBaseUrl: "https://lovely-mooncake-c360ff.netlify.app/api"
 });
 // moved to client/
