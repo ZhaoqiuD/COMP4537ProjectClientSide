@@ -18,14 +18,14 @@ class AuthApi {
     }
   }
 
-  async register(email, password) {
-  return this.#fetchJson('/api/auth/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ email, password })
-  });
-}
+  async register(firstName, email, password) {
+    return this.#fetchJson('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ firstName, email, password })
+    });
+  }
 
 async login(email, password) {
   const data = await this.#fetchJson('/api/auth/login', {

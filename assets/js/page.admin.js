@@ -80,9 +80,10 @@ class AdminPage extends PageBase {
             <table class="table table-hover mb-0">
               <thead>
                 <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Total Requests</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Token</th>
+          <th>Total Requests</th>
                 </tr>
               </thead>
               <tbody id="user-stats">
@@ -176,8 +177,9 @@ class AdminPage extends PageBase {
     
     tbody.innerHTML = users.map(user => `
       <tr>
-        <td>${user.username || 'N/A'}</td>
+        <td>${user.firstName || 'N/A'}</td>
         <td>${user.email}</td>
+        <td>${user.token || 'N/A'}</td>
         <td>${user.totalRequests || 0}</td>
       </tr>
     `).join('');

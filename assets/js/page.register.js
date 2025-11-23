@@ -17,17 +17,19 @@ class RegisterPage {
     e.preventDefault();
     this.setError('');
     this.setBusy(true);
+    const firstInput = document.getElementById('firstName');
     const emailInput = document.getElementById('email');
     const passInput = document.getElementById('password');
+    const firstName = firstInput?.value?.trim();
     const email = emailInput?.value?.trim();
     const password = passInput?.value ?? '';
-    if (!email || !password) {
-      this.setError('Please enter email and password.');
+    if (!firstName || !email || !password) {
+      this.setError('Please enter first name, email and password.');
       this.setBusy(false);
       return;
     }
     try {
-      await this.api.register(email, password);
+      await this.api.register(firstName, email, password);
       // After successful registration, go to login
       window.location.href = 'login.html';
     } catch (err) {
