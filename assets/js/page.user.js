@@ -185,23 +185,27 @@ class UserPage extends PageBase {
 
         await this.loadUsage();
 
-        let preds = data?.model_output || data?.predictions;
+        // Normalize predictions from various shapes/strings
+        let preds = data?.model_output ?? data?.predictions ?? null;
         if (typeof preds === 'string') {
-          try { preds = JSON.parse(preds.replace(/'/g, '"')); } catch (e) { /* ignore */ }
+          try { preds = JSON.parse(preds.replace(/'/g, '"')); } catch { /* ignore */ }
         }
 
         let label = null;
         let confidence = null;
 
-        if (Array.isArray(preds) && preds[0]) {
-          if (preds[0].label) {
-            label = preds[0].label;
-            confidence = Number(preds[0].confidence) || 0;
-          } else {
-            const first = preds[0];
+        if (Array.isArray(preds)) {
+          const first = preds[0];
+          if (first?.label) {
+            label = first.label;
+            confidence = Number(first.confidence) || 0;
+          } else if (first && typeof first === 'object') {
             const entry = Object.entries(first)[0] || [];
             label = entry[0] || null;
             confidence = Number(entry[1]) || 0;
+          } else if (typeof first === 'string') {
+            label = first;
+            confidence = 0;
           }
         } else if (preds && typeof preds === 'object') {
           const entry = Object.entries(preds)[0] || [];
