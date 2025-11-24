@@ -188,7 +188,9 @@ class UserPage extends PageBase {
         // Normalize predictions from various shapes/strings
         let preds = data?.model_output ?? data?.predictions ?? null;
         if (typeof preds === 'string') {
-          try { preds = JSON.parse(preds.replace(/'/g, '"')); } catch { /* ignore */ }
+          // HF Space sometimes returns single-quoted JSON
+          const cleaned = preds.replace(/'/g, '"');
+          try { preds = JSON.parse(cleaned); } catch { preds = cleaned; }
         }
 
         let label = null;
@@ -211,6 +213,12 @@ class UserPage extends PageBase {
           const entry = Object.entries(preds)[0] || [];
           label = entry[0] || null;
           confidence = Number(entry[1]) || 0;
+        } else if (typeof preds === 'string') {
+          // string fallback like "[{'label': 'paper', 'confidence': 0.9}]"
+          const matchLabel = preds.match(/label['"]?:\s*['"]([^'"]+)['"]/i);
+          const matchConf = preds.match(/confidence['"]?:\s*([0-9.]+)/i);
+          label = matchLabel ? matchLabel[1] : null;
+          confidence = matchConf ? Number(matchConf[1]) : 0;
         }
 
         if (label) {
