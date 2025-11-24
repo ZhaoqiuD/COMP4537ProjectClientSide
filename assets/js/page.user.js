@@ -187,21 +187,16 @@ class UserPage extends PageBase {
 
         // Normalize predictions from various shapes/strings
         let preds = data?.model_output ?? data?.predictions ?? null;
-        if (typeof preds === 'string') {
-          // HF Space sometimes returns single-quoted JSON
-          const cleaned = preds.replace(/'/g, '"');
-          try { preds = JSON.parse(cleaned); } catch { preds = cleaned; }
-        }
-
         let label = null;
         let confidence = null;
 
-        if (Array.isArray(preds)) {
-          const first = preds[0];
-          if (first?.label) {
+        const parseArrayPred = (arr) => {
+          const first = arr[0];
+          if (!first) return;
+          if (first.label) {
             label = first.label;
             confidence = Number(first.confidence) || 0;
-          } else if (first && typeof first === 'object') {
+          } else if (typeof first === 'object') {
             const entry = Object.entries(first)[0] || [];
             label = entry[0] || null;
             confidence = Number(entry[1]) || 0;
@@ -209,16 +204,40 @@ class UserPage extends PageBase {
             label = first;
             confidence = 0;
           }
+        };
+
+        const parseStringPred = (str) => {
+          // Try JSON parse after replacing single quotes
+          const cleaned = str.replace(/'/g, '"');
+          try {
+            const parsed = JSON.parse(cleaned);
+            if (Array.isArray(parsed)) {
+              parseArrayPred(parsed);
+              return;
+            } else if (parsed && typeof parsed === 'object') {
+              const entry = Object.entries(parsed)[0] || [];
+              label = entry[0] || null;
+              confidence = Number(entry[1]) || 0;
+              return;
+            }
+          } catch (_) {
+            /* ignore */
+          }
+          // Regex fallback
+          const matchLabel = str.match(/label['"]?:\s*['"]([^'"]+)['"]/i);
+          const matchConf = str.match(/confidence['"]?:\s*([0-9.]+)/i);
+          label = matchLabel ? matchLabel[1] : label;
+          confidence = matchConf ? Number(matchConf[1]) : confidence;
+        };
+
+        if (typeof preds === 'string') {
+          parseStringPred(preds);
+        } else if (Array.isArray(preds)) {
+          parseArrayPred(preds);
         } else if (preds && typeof preds === 'object') {
           const entry = Object.entries(preds)[0] || [];
           label = entry[0] || null;
           confidence = Number(entry[1]) || 0;
-        } else if (typeof preds === 'string') {
-          // string fallback like "[{'label': 'paper', 'confidence': 0.9}]"
-          const matchLabel = preds.match(/label['"]?:\s*['"]([^'"]+)['"]/i);
-          const matchConf = preds.match(/confidence['"]?:\s*([0-9.]+)/i);
-          label = matchLabel ? matchLabel[1] : null;
-          confidence = matchConf ? Number(matchConf[1]) : 0;
         }
 
         if (label) {
