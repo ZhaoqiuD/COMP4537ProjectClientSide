@@ -185,15 +185,32 @@ class UserPage extends PageBase {
 
         await this.loadUsage();
 
-        const preds = data?.model_output || data?.predictions;
-        if (Array.isArray(preds) && preds[0]?.label) {
-          const best = preds[0];
-          resultText.textContent = `${best.label} (${(best.confidence * 100 || 0).toFixed(1)}%)`;
-          resultText.classList.remove('text-danger');
-          resultText.classList.add('text-success');
+        let preds = data?.model_output || data?.predictions;
+        if (typeof preds === 'string') {
+          try { preds = JSON.parse(preds.replace(/'/g, '"')); } catch (e) { /* ignore */ }
+        }
+
+        let label = null;
+        let confidence = null;
+
+        if (Array.isArray(preds) && preds[0]) {
+          if (preds[0].label) {
+            label = preds[0].label;
+            confidence = Number(preds[0].confidence) || 0;
+          } else {
+            const first = preds[0];
+            const entry = Object.entries(first)[0] || [];
+            label = entry[0] || null;
+            confidence = Number(entry[1]) || 0;
+          }
         } else if (preds && typeof preds === 'object') {
-          const top = Object.entries(preds)[0];
-          resultText.textContent = `${top[0]} (${(top[1] * 100).toFixed(1)}%)`;
+          const entry = Object.entries(preds)[0] || [];
+          label = entry[0] || null;
+          confidence = Number(entry[1]) || 0;
+        }
+
+        if (label) {
+          resultText.textContent = `${label} (${(confidence * 100).toFixed(1)}%)`;
           resultText.classList.remove('text-danger');
           resultText.classList.add('text-success');
         } else if (data?.classification_id) {
