@@ -24,8 +24,19 @@ class RegisterPage {
     const firstName = firstInput?.value?.trim();
     const email = emailInput?.value?.trim();
     const password = passInput?.value ?? '';
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     if (!firstName || !email || !password) {
       this.setError(Messages.registerMissing);
+      this.setBusy(false);
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      this.setError(Messages.registerInvalidEmail || 'Enter a valid email address.');
+      this.setBusy(false);
+      return;
+    }
+    if (password.length < 6) {
+      this.setError(Messages.registerWeakPassword || 'Password must be at least 6 characters.');
       this.setBusy(false);
       return;
     }
