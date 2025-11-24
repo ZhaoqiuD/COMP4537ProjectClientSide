@@ -201,8 +201,27 @@ class UserPage extends PageBase {
             label = entry[0] || null;
             confidence = Number(entry[1]) || 0;
           } else if (typeof first === 'string') {
-            label = first;
-            confidence = 0;
+            // string item, try to parse to JSON then fall back to regex
+            const cleaned = first.replace(/'/g, '"');
+            try {
+              const parsed = JSON.parse(cleaned);
+              if (Array.isArray(parsed)) {
+                parseArrayPred(parsed);
+                return;
+              }
+              if (parsed && typeof parsed === 'object') {
+                const entry = Object.entries(parsed)[0] || [];
+                label = entry[0] || null;
+                confidence = Number(entry[1]) || 0;
+                return;
+              }
+            } catch (_) {
+              /* ignore */
+            }
+            const matchLabel = first.match(/label['"]?:\s*['"]([^'"]+)['"]/i);
+            const matchConf = first.match(/confidence['"]?:\s*([0-9.]+)/i);
+            label = matchLabel ? matchLabel[1] : first;
+            confidence = matchConf ? Number(matchConf[1]) : 0;
           }
         };
 
